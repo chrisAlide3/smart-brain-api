@@ -6,7 +6,8 @@ const knex = require('knex');
 
 const register = require('./controllers/register.js');
 const signin = require('./controllers/signin.js');
-const image = require('./controllers/image.js')
+const image = require('./controllers/image.js');
+const ranking = require('./controllers/ranking.js');
 
 const db = knex({
     client: 'pg',
@@ -84,20 +85,10 @@ app.delete('/profile/:id', (req, res) => {
 })
 
 //Image
-app.put('/image', (req, res) =>Image.handleImage(req, res, db))
+app.put('/image', (req, res) =>image.handleImage(req, res, db))
 
 //Ranking
-app.get('/userRank/:id', (req, res) => {
-    const {id} = req.params;
-     db.raw('select *, rank() over (order by entries desc) as rank from users')
-     .then(ranks => {
-        const filteredArr = ranks.rows.filter(users => users.id == id );
-        res.json(filteredArr[0]);
-    })
-    .catch(err => {
-        res.json('invalid user');
-    })
-})
+app.get('/userRank/:id', (req, res) => ranking.handleRanking(req, res, db))
 
 app.listen(3000, ()=> {
     console.log('App is running');
