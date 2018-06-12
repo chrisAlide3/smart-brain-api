@@ -25,28 +25,26 @@ app.use(bodyParser.json());
 app.use(cors());
 
 //Defining routes
-app.get('/', (req, res) => {
-    res.send('App server runing');
-})
+app.get('/', (req, res) => {res.send(database.users)})
 
 //Register (we pass db and bcrypt. called dependency injection)
-app.post('/register', (req, res) => register.handleRegister(req, res, db, bcrypt))
+app.post('/register', (req, res) => { register.handleRegister(req, res, db, bcrypt) })
 
 //Signin
-app.post('/signin', (req, res) => signin.handleSignin(req, res, db, bcrypt))
+app.post('/signin', (req, res) => { signin.handleSignin(req, res, db, bcrypt) })
 
 //Profile
-app.put('/profile', (req, res) => profile.handleProfilePut(req, res, db))
+app.put('/profile', (req, res) => { profile.handleProfilePut(req, res, db) })
 
-app.get('/profile/:id', (req, res) => profile.handleProfileGet(req, res, db))
+app.get('/profile/:id', (req, res) => { profile.handleProfileGet(req, res, db) })
 
-app.delete('/profile/:id', (req, res) => profile.handleProfileDelete(req, res, db))
+app.delete('/profile/:id', (req, res) => { profile.handleProfileDelete(req, res, db) })
 
 //Image
-app.put('/image', (req, res) => image.handleImage(req, res, db))
+app.put('/image', (req, res) => { image.handleImage(req, res, db) })
 
 //Ranking
-app.get('/userRank/:id', (req, res) => ranking.handleRanking(req, res, db))
+app.get('/userRank/:id', (req, res) => { ranking.handleRanking(req, res, db) })
 
 app.listen(3000, ()=> {
     console.log('App is running');
