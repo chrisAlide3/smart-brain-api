@@ -44,8 +44,8 @@ app.put('/image', (req, res) => { image.handleImage(req, res, db) })
 //Ranking
 app.get('/userRank/:id', (req, res) => { ranking.handleRanking(req, res, db) })
 
-app.listen(3000, ()=> {
-    console.log('App is running');
+app.listen(process.env.PORT || 3000, ()=> {
+    console.log(`App is running on port ${process.env.PORT}`);
 });
 
 /*
