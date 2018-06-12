@@ -5,6 +5,7 @@ const cors = require('cors');
 const knex = require('knex');
 
 const register = require('./controllers/register.js');
+const signin = require('./controllers/signin.js');
 
 const db = knex({
     client: 'pg',
@@ -29,26 +30,7 @@ app.get('/', (req, res) => {
 app.post('/register', (req, res) => register.handleRegister(req, res, db, bcrypt))
 
 //Signin
-app.post('/signin', (req, res) => {
-    const {email, password} = req.body;
-
-    db('users')
-    .where('email', email)
-    .innerJoin('login', 'users.id', 'login.user_id')
-
-    .then(response => {
-        if (bcrypt.compareSync(password, response[0].hash)) {
-            //Knex join returns only the id of login not users, so we need to rest in on user
-            response[0].id = response[0].user_id;
-            res.json(response[0]);
-        } else {
-            res.json('Password invalid');
-        }
-    })
-    .catch(err => {
-        res.json('Invalid email');
-    })
-})
+app.post('/signin', (req, res) => signin.handleSignin(req, res, db, bcrypt))
 
 //Profile
 app.put('/profile', (req, res) => {
