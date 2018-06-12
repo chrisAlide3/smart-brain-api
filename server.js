@@ -2,7 +2,9 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const bcrypt = require('bcrypt-nodejs');
 const cors = require('cors');
-const knex = require('knex')
+const knex = require('knex');
+
+const register = require('./controllers/register.js');
 
 const db = knex({
     client: 'pg',
@@ -22,6 +24,9 @@ app.use(cors());
 app.get('/', (req, res) => {
     res.send('App server runing');
 })
+
+//Register (we pass db and bcrypt. called dependency injection)
+app.post('/register', (req, res) => register.handleRegister(req, res, db, bcrypt))
 
 //Signin
 app.post('/signin', (req, res) => {
@@ -43,41 +48,6 @@ app.post('/signin', (req, res) => {
     .catch(err => {
         res.json('Invalid email');
     })
-})
-
-//Register
-app.post('/register', (req, res) => {
-    const { name, email, password} = req.body;
-    if (!name || !email || !password) {
-        return res.status(400).json('All fields are required');
-    }
-    const hashPwd = bcrypt.hashSync(password);
-        // Write login and users table
-        db.transaction(trx => {
-            trx('users')
-            .returning('id')
-            .insert({
-                name: name, 
-                email: email, 
-                joined: new Date()
-            })
-            .then(userId => {
-                return trx('login')
-                .returning('user_id')
-                .insert({
-                    user_id: userId[0],
-                    hash: hashPwd
-                })
-                .then(userId => {
-                    res.json(userId[0])
-                })
-            })
-            .then(trx.commit)
-            .catch(trx.rollback)
-        })
-        .catch(err => {
-            res.status(400).json('Email already registered. Please Signin');
-        })
 })
 
 //Profile
