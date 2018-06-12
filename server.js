@@ -35,9 +35,7 @@ app.post('/signin', (req, res) => { signin.handleSignin(req, res, db, bcrypt) })
 
 //Profile
 app.put('/profile', (req, res) => { profile.handleProfilePut(req, res, db) })
-
 app.get('/profile/:id', (req, res) => { profile.handleProfileGet(req, res, db) })
-
 app.delete('/profile/:id', (req, res) => { profile.handleProfileDelete(req, res, db) })
 
 //Image
