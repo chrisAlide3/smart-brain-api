@@ -9,102 +9,76 @@ const db = knex({
     connection: {
       host : '127.0.0.1',
       user : 'chris',
-      password : '',
+      password : 'phils33',
       database : 'smart-brain'
     }
   });
-
 
 const app = express();
 app.use(bodyParser.json());
 app.use(cors());
 
-const database = {
-    users: [
-        {
-            id: '1',
-            name: 'Chris',
-            email: 'a@b.com',
-            password: '1234',
-            entries: 0,
-            joined: new Date(),
-        },
-
-        {
-            id: '2',
-            name: 'Herbert',
-            email: 'c@d.com',
-            password: '1234',
-            entries: 0,
-            joined: new Date(),
-        },
-    ]
-};
-
 //Defining routes
 app.get('/', (req, res) => {
-    res.send(database.users);
+    res.send('App server runing');
 })
 
 //Signin
 app.post('/signin', (req, res) => {
     const {email, password} = req.body;
 
-    db('login')
+    db('users')
     .where('email', email)
+    .innerJoin('login', 'users.id', 'login.user_id')
+
     .then(response => {
         if (bcrypt.compareSync(password, response[0].hash)) {
-            db('users')
-            .where('email', response[0].email)
-            .then(user => {
-                res.json(user);
-            })
-            .catch(err => {
-                res.status(400).json('Email not valid');
-            })
+            //Knex join returns only the id of login not users, so we need to rest in on user
+            response[0].id = response[0].user_id;
+            res.json(response[0]);
         } else {
-            res.status(400).json('Invalid password');
+            res.json('Password invalid');
         }
     })
     .catch(err => {
-        res.status(400).json('Invalid email');
+        res.json('Invalid email');
     })
 })
 
 //Register
 app.post('/register', (req, res) => {
     const { name, email, password} = req.body;
+    if (!name || !email || !password) {
+        return res.status(400).json('All fields are required');
+    }
     const hashPwd = bcrypt.hashSync(password);
-                // Write login and users table
-                db.transaction(trx => {
-                    trx.insert({
-                        email: email,
-                        hash: hashPwd
-                    })
-                    .into('login')
-                    .returning('email')
-                    .then(loginEmail => {
-                        //Insert Users
-                        return trx('users')
-                        .returning('*')
-                        .insert({
-                            name: name, 
-                            email: loginEmail[0], 
-                            joined: new Date()
-                        })
-                        .then(user => {
-                            res.json(user[0]);
-                        })
-                    })
-                    .then(trx.commit)
-                    .catch(trx.rollback) 
+        // Write login and users table
+        db.transaction(trx => {
+            trx('users')
+            .returning('id')
+            .insert({
+                name: name, 
+                email: email, 
+                joined: new Date()
+            })
+            .then(userId => {
+                return trx('login')
+                .returning('user_id')
+                .insert({
+                    user_id: userId[0],
+                    hash: hashPwd
                 })
-                .catch(err => {
-                    res.status(400).json('Email already registered. Please Signin');
+                .then(userId => {
+                    res.json(userId[0])
                 })
-     
+            })
+            .then(trx.commit)
+            .catch(trx.rollback)
+        })
+        .catch(err => {
+            res.status(400).json('Email already registered. Please Signin');
+        })
 })
-
 
 //Profile
 app.put('/profile', (req, res) => {
@@ -148,32 +122,44 @@ app.delete('/profile/:id', (req, res) => {
     db('users')
     .where('id', id)
     .del()
-        .then(message => {
-            res.json('deleted');
-        })
-        .catch(err => {
-            res.status(400).json('Database error');
-        })
+    .then(message => {
+        res.json('deleted');
+    })
+    .catch(err => {
+        res.status(400).json('Database error');
+    })
 })
 
 //Image
 app.put('/image', (req, res) => {
     const { id } = req.body;
     db('users')
-        .where('id', id)
-        .increment('entries', 1)
-        .returning('entries')
-        .then(entries => {
-            res.json(entries[0]);
-        })
-        .catch(err => {
-            res.status(400).json('User not found');
-        })
+    .where('id', id)
+    .increment('entries', 1)
+    .returning('entries')
+    .then(entries => {
+        res.json(entries[0]);
+    })
+    .catch(err => {
+        res.status(400).json('User not found');
+    })
+})
+
+//Ranking
+app.get('/userRank/:id', (req, res) => {
+    const {id} = req.params;
+     db.raw('select *, rank() over (order by entries desc) as rank from users')
+     .then(ranks => {
+        const filteredArr = ranks.rows.filter(users => users.id == id );
+        res.json(filteredArr[0]);
+    })
+    .catch(err => {
+        res.json('invalid user');
+    })
 })
 
 app.listen(3000, ()=> {
     console.log('App is running');
-    
 });
 
 /*
@@ -188,6 +174,3 @@ DELETE= delete data
 /profile    --> GET     = user
 /image       --> PUT     = user
 */
-
-
-
