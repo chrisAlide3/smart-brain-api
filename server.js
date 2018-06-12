@@ -6,6 +6,7 @@ const knex = require('knex');
 
 const register = require('./controllers/register.js');
 const signin = require('./controllers/signin.js');
+const profile = require('./controllers/profile.js');
 const image = require('./controllers/image.js');
 const ranking = require('./controllers/ranking.js');
 
@@ -35,57 +36,14 @@ app.post('/register', (req, res) => register.handleRegister(req, res, db, bcrypt
 app.post('/signin', (req, res) => signin.handleSignin(req, res, db, bcrypt))
 
 //Profile
-app.put('/profile', (req, res) => {
-    const {id, name, email} = req.body;
+app.put('/profile', (req, res) => profile.handleProfilePut(req, res, db))
 
-    db('users')
-        .where('id', id)
-        .returning('*')
-        .update({
-        name: name,
-        email: email
-    })
-        .then(user => {
-            res.json(user);
-        })
-        .catch(err => {
-            res.json('Database error');
-        })
-})
+app.get('/profile/:id', (req, res) => profile.handleProfileGet(req, res, db))
 
-app.get('/profile/:id', (req, res) => {
-    const { id } = req.params;
-    
-    db('users').where('id', id)
-        .then(user => {
-            if (user.length > 0) {
-                res.json(user[0]);
-            } else {
-                res.status(400).json('User not found');
-            }
-        })
-        .catch(err => {
-            console.log('Failed: ',id);
-            
-            res.status(400).json('Database error')
-        })
-})
-
-app.delete('/profile/:id', (req, res) => {
-    const { id } = req.params;
-    db('users')
-    .where('id', id)
-    .del()
-    .then(message => {
-        res.json('deleted');
-    })
-    .catch(err => {
-        res.status(400).json('Database error');
-    })
-})
+app.delete('/profile/:id', (req, res) => profile.handleProfileDelete(req, res, db))
 
 //Image
-app.put('/image', (req, res) =>image.handleImage(req, res, db))
+app.put('/image', (req, res) => image.handleImage(req, res, db))
 
 //Ranking
 app.get('/userRank/:id', (req, res) => ranking.handleRanking(req, res, db))
