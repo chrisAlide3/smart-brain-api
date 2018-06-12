@@ -6,6 +6,7 @@ const knex = require('knex');
 
 const register = require('./controllers/register.js');
 const signin = require('./controllers/signin.js');
+const image = require('./controllers/image.js')
 
 const db = knex({
     client: 'pg',
@@ -83,19 +84,7 @@ app.delete('/profile/:id', (req, res) => {
 })
 
 //Image
-app.put('/image', (req, res) => {
-    const { id } = req.body;
-    db('users')
-    .where('id', id)
-    .increment('entries', 1)
-    .returning('entries')
-    .then(entries => {
-        res.json(entries[0]);
-    })
-    .catch(err => {
-        res.status(400).json('User not found');
-    })
-})
+app.put('/image', (req, res) =>Image.handleImage(req, res, db))
 
 //Ranking
 app.get('/userRank/:id', (req, res) => {
