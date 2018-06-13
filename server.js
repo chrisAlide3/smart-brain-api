@@ -25,7 +25,7 @@ app.use(bodyParser.json());
 app.use(cors());
 
 //Defining routes
-app.get('/', (req, res) => {res.send(database.users)})
+app.get('/', (req, res) => {res.send('it is working!')})
 
 //Register (we pass db and bcrypt. called dependency injection)
 app.post('/register', (req, res) => { register.handleRegister(req, res, db, bcrypt) })
