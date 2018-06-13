@@ -45,7 +45,11 @@ app.put('/image', (req, res) => { image.handleImage(req, res, db) })
 app.get('/userRank/:id', (req, res) => { ranking.handleRanking(req, res, db) })
 
 app.listen(process.env.PORT || 3000, ()=> {
-    console.log(`App is running on port ${process.env.PORT}`);
+  if (process.env.PORT) {
+    console.log(`App is running on port: ${process.env.PORT}`);
+  } else {
+    console.log(`App is running on port: 3000`);
+  }
 });
 
 /*
