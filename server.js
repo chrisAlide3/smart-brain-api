@@ -10,15 +10,26 @@ const profile = require('./controllers/profile.js');
 const image = require('./controllers/image.js');
 const ranking = require('./controllers/ranking.js');
 
+// for local connection
+// const db = knex({
+//     client: 'pg',
+//     connection: {
+//       host : '127.0.0.1',
+//       user : 'chris',
+//       password : 'phils33',
+//       database : 'smart-brain'
+//     }
+//   });
+
+//For heroku connection
 const db = knex({
-    client: 'pg',
-    connection: {
-      host : '127.0.0.1',
-      user : 'chris',
-      password : 'phils33',
-      database : 'smart-brain'
-    }
-  });
+  client: 'pg',
+  connection: {
+    connectionString: process.env.DATABASE_URL,
+    ssl: true,
+  }
+});
+
 
 const app = express();
 app.use(bodyParser.json());
