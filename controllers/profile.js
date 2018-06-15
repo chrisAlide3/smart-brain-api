@@ -43,8 +43,8 @@ const handleProfileDelete = (req, res, db) => {
     .where('id', id)
     .del()
     .then(message => {
-        db('users')
-        .where('id', id)
+        db('login')
+        .where('user_id', id)
         .del()
         .then(message => {
             res.json('deleted');
