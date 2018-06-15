@@ -43,7 +43,15 @@ const handleProfileDelete = (req, res, db) => {
     .where('id', id)
     .del()
     .then(message => {
-        res.json('deleted');
+        db('users')
+        .where('id', id)
+        .del()
+        .then(message => {
+            res.json('deleted');
+        })
+        .catch(err => {
+            res.status(400).json('Database error');
+        })
     })
     .catch(err => {
         res.status(400).json('Database error');
