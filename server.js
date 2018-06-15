@@ -10,13 +10,13 @@ const profile = require('./controllers/profile.js');
 const image = require('./controllers/image.js');
 const ranking = require('./controllers/ranking.js');
 
-// for local connection
+// for local connection. Just add username and password
 // const db = knex({
 //     client: 'pg',
 //     connection: {
 //       host : '127.0.0.1',
-//       user : 'chris',
-//       password : 'phils33',
+//       user : '',
+//       password : '',
 //       database : 'smart-brain'
 //     }
 //   });
